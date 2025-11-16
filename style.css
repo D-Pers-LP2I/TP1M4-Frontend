@@ -1,4 +1,6 @@
-/* style.css */
+/* style.css - Version finale (Mode Sombre + Couleurs Dynamiques) */
+
+/* --- 1. Votre style de base (Mode Sombre) --- */
 body {
     font-family: sans-serif;
     background-color: #121212;
@@ -6,11 +8,13 @@ body {
     margin: 0;
     padding: 20px;
 }
+
 h1, h2 {
     color: #FFFFFF;
     border-bottom: 2px solid #333;
     padding-bottom: 5px;
 }
+
 .card {
     background-color: #1E1E1E;
     border: 1px solid #333;
@@ -18,8 +22,36 @@ h1, h2 {
     padding: 5px 20px;
     margin-bottom: 20px;
 }
+
+/* --- 2. Votre style pour "En attente..." --- */
+/* C'est la couleur orange par défaut */
 #statut-serveur-principal, #statut-camera-1 {
     font-size: 1.2em;
     font-weight: bold;
-    color: #FFA500; /* Orange (couleur "En attente") */
+    color: #FFA500; /* Orange */
+    
+    /* On ajoute une transition douce pour le changement de couleur */
+    transition: color 0.4s ease;
+}
+
+
+/* --- 3. Ajout des couleurs dynamiques (par-dessus le orange) --- */
+/* Ces règles sont plus spécifiques, elles "gagnent" contre la règle orange */
+
+/* 🟢 Vert pour "En Ligne" */
+#statut-serveur-principal.online,
+#statut-camera-1.online {
+    color: #81c995; /* Vert clair (lisible sur fond sombre) */
+}
+
+/* 🔴 Rouge pour "Hors Ligne" / "Éteinte" */
+#statut-serveur-principal.offline,
+#statut-camera-1.offline {
+    color: #f28b82; /* Rouge clair (lisible sur fond sombre) */
+}
+
+/* ⚫ Gris pour "Inconnu" (erreur fetch) */
+#statut-serveur-principal.unknown,
+#statut-camera-1.unknown {
+    color: #bdc1c6; /* Gris clair (pour "Inconnu") */
 }

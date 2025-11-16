@@ -1,39 +1,57 @@
-/* main.js */
+// --- CONFIGURATION ---
+const REFRESH_INTERVAL = 3000;
+const API_URL = 'http://127.0.0.1:8000/api/status';
 
-// 1. On attend que la page HTML (le DOM) soit complètement chargée
-// Avant de tenter de manipuler le DOM, on s'assure qu'il existe.
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Fonction "helper" compacte pour mettre à jour un élément du DOM.
+ */
+const updateElementStatus = (id, status) => {
+    const element = document.getElementById(id);
+    if (!element) return; // Sort si l'élément n'est pas trouvé
+
+    element.textContent = status;
+
+    // Logique de classe pour les couleurs
+    const classMap = {
+        'En Ligne': 'online',
+        'Hors Ligne': 'offline',
+        'Éteinte': 'offline',
+        'Inconnu': 'unknown'
+    };
     
-    // Message de vérification dans la console F12
-    console.log('Le DOM est prêt. Lancement du fetch...');
+    // Réinitialise la classe avant d'ajouter la nouvelle
+    // Note: Votre HTML utilise <p> et non <span class="status">
+    // Donc nous modifions directement la classe du <p>
+    element.className = classMap[status] || 'unknown';
+};
 
-    // 2. On lance la requête (asynchrone) pour lire le fichier data.json
-    // (Voir concept 2.4.3 L'asynchronisme)
-    fetch('./data.json')
-        .then(response => response.json()) // 3. On convertit la réponse en objet JSON
-        .then(data => {
-            // 4. Cette partie s'exécute quand les données sont arrivées
-            console.log('Données reçues :', data);
+/**
+ * Fonction fetch principale.
+ */
+const fetchData = async () => {
+    let data;
 
-            // 5. MISE À JOUR DU SERVEUR (SRV-01)
-            // On "attrape" la cible HTML (Voir explications sur le DOM) 
-            // Note : 'statut-serveur-principal' doit correspondre à l'id du HTML 
-            const serveurElement = document.getElementById('statut-serveur-principal');
-            
-            // On met à jour son contenu avec la donnée du JSON
-            // Note : data.srv01 correspond à la clé dans data.json
-            serveurElement.textContent = data.srv01;
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        data = await response.json();
 
-            // 6. MISE À JOUR DE LA CAMÉRA (CAM-01)
-            // On "attrape" l'autre cible
-            // Note : 'statut-camera-1' doit correspondre à l'id du HTML 
-            const cameraElement = document.getElementById('statut-camera-1');
-            
-            // On met à jour son contenu
-            // Note : data.cam01 correspond à la clé dans data.json
-            cameraElement.textContent = data.cam01;
-        });
+    } catch (error) {
+        console.error("Fetch error:", error.message);
+        data = { srv01: "Inconnu", cam01: "Inconnu" };
+    }
+    
+    // --- C'EST LA PARTIE CORRIGÉE ---
+    // On cible maintenant les BONS ID de votre HTML :
+    // 'statut-serveur-principal' reçoit les données de 'data.srv01'
+    updateElementStatus('statut-serveur-principal', data.srv01);
+    
+    // 'statut-camera-1' reçoit les données de 'data.cam01'
+    updateElementStatus('statut-camera-1', data.cam01);
+};
 
-    // Ce message s'affichera AVANT "Données reçues"
-    console.log('Fin du script principal (Le fetch est parti, mais pas encore revenu)');
+// --- POINT D'ENTRÉE ---
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData(); // Appel initial
+    setInterval(fetchData, REFRESH_INTERVAL); // Lancement de la boucle
 });

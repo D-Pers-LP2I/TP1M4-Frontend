@@ -1,0 +1,35 @@
+@startuml
+' Style pour lisibilité
+skinparam sequenceParticipant borderStyle solid
+skinparam sequenceMessageAlign center
+
+title Flux de données asynchrone (Fetch)
+
+actor Script as "main.js (Notre script)"
+participant Navigateur as "Client (navigateur)"
+participant Serveur as "Serveur (data.json)"
+participant DOM as "Page Web (index.html)"
+
+Script -> Navigateur: 1. fetch('./data.json') \n **(Demande de la ressource)**
+
+Navigateur --> Script: 2. Réponse (en attente) \n **(L'opération asynchrone est lancée)**
+
+note right of Script
+  3. Le script continue (non-bloquant)
+  console.log('Fin du script...')
+end note
+
+Navigateur -> Serveur: 4. Requête GET \n **(Requête de lecture)**
+Serveur --> Navigateur: 5. Réponse \n **(Réponse (Texte brut))**
+
+Navigateur -> Navigateur: 6. Conversion en objet JSON \n **(Analyse syntaxique (Parsing))**
+Navigateur --> Script: 7. Données prêtes ! \n **(Données structurées (objet 'data'))**
+
+note right of Script
+  8. Exécution du .then(data => ...)
+  **(Exécution du 'callback' (code en attente))**
+end note
+
+Script -> DOM: 9. getElementById(...) \n **(Ciblage de l'élément HTML...)**
+Script -> DOM: 10. .textContent = data.srv01 \n **(...et mise à jour du contenu)**
+@enduml
